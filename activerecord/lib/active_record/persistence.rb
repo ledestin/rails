@@ -519,7 +519,7 @@ module ActiveRecord
         end
 
         changes = prepare_changes_hash(attributes, time)
-        scope = prepare_scope
+        scope = prepare_touch_scope
 
         clear_attribute_changes(changes.keys)
         result = scope.update_all(changes) == 1
@@ -547,7 +547,7 @@ module ActiveRecord
       changes
     end
 
-    def prepare_scope
+    def touch_scope
       primary_key = self.class.primary_key
       scope = self.class.unscoped.where(primary_key => _read_attribute(primary_key))
 
