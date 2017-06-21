@@ -1,7 +1,16 @@
 module ActiveRecord
   # = Active Record \Persistence
   module Persistence
+    module StoreKeys
+      refine Hash do
+        def store_keys(keys, value)
+          keys.each { |key| store(key, value) }
+        end
+      end
+    end
+
     extend ActiveSupport::Concern
+    include StoreKeys
 
     module ClassMethods
       # Creates an object (or multiple objects) and saves it to the database, if validations pass.
@@ -519,7 +528,7 @@ module ActiveRecord
       write_attributes(attributes, time)
 
       changes = {}
-      add_changes_of_time_for_attributes(changes, attributes, time)
+      changes.store_keys(attributes, time)
 
       scope = scope_by_primary_key
 
