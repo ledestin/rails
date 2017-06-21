@@ -513,28 +513,26 @@ module ActiveRecord
       attributes = timestamp_attributes_for_update_in_model
       attributes.concat(names)
 
-      unless attributes.empty?
-        changes = changes_of_time_for_attributes(attributes, time)
+      return true if attributes.empty?
 
-        scope = scope_by_primary_key
+      changes = changes_of_time_for_attributes(attributes, time)
 
-        if locking_enabled?
-          extend_scope_to_match_locking_column_value(scope)
-          increment_locking_column_value_changes(changes)
-        end
+      scope = scope_by_primary_key
 
-        clear_attribute_changes(changes.keys)
-        result = scope.update_all(changes) == 1
-
-        if !result && locking_enabled?
-          raise ActiveRecord::StaleObjectError.new(self, "touch")
-        end
-
-        @_trigger_update_callback = result
-        result
-      else
-        true
+      if locking_enabled?
+        extend_scope_to_match_locking_column_value(scope)
+        increment_locking_column_value_changes(changes)
       end
+
+      clear_attribute_changes(changes.keys)
+      result = scope.update_all(changes) == 1
+
+      if !result && locking_enabled?
+        raise ActiveRecord::StaleObjectError.new(self, "touch")
+      end
+
+      @_trigger_update_callback = result
+      result
     end
 
   private
