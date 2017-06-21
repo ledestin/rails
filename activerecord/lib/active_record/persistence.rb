@@ -519,9 +519,8 @@ module ActiveRecord
         scope = scope_by_primary_key
 
         if locking_enabled?
-          locking_column = self.class.locking_column
-          scope = scope.where(locking_column => _read_attribute(locking_column))
-          changes[locking_column] = increment_lock
+          extend_scope_to_match_locking_column_value(scope)
+          increment_locking_column_value_changes(changes)
         end
 
         clear_attribute_changes(changes.keys)
@@ -552,6 +551,15 @@ module ActiveRecord
     def scope_by_primary_key
       primary_key = self.class.primary_key
       self.class.unscoped.where(primary_key => _read_attribute(primary_key))
+    end
+
+    def extend_scope_to_match_locking_column_value(scope)
+      locking_column = self.class.locking_column
+      scope.where(locking_column => _read_attribute(locking_column))
+    end
+
+    def increment_locking_column_value_changes(changes)
+      changes[locking_column] = increment_lock
     end
 
     # A hook to be overridden by association modules.
