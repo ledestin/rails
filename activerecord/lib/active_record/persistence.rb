@@ -518,11 +518,7 @@ module ActiveRecord
           write_attribute(column, time)
         end
 
-        changes = {}
-
-        attributes.each do |column|
-          changes[column] = time
-        end
+        changes = prepare_changes_hash(attributes, time)
 
         primary_key = self.class.primary_key
         scope = self.class.unscoped.where(primary_key => _read_attribute(primary_key))
@@ -548,6 +544,14 @@ module ActiveRecord
     end
 
   private
+
+    def prepare_changes_hash(attributes, time)
+      changes = {}
+      attributes.each do |column|
+        changes[column] = time
+      end
+      changes
+    end
 
     # A hook to be overridden by association modules.
     def destroy_associations
