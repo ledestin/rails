@@ -526,7 +526,6 @@ module ActiveRecord
         if locking_enabled?
           locking_column = self.class.locking_column
           scope = scope.where(locking_column => _read_attribute(locking_column))
-          changes[locking_column] = increment_lock
         end
 
         clear_attribute_changes(changes.keys)
@@ -550,6 +549,8 @@ module ActiveRecord
       attributes.each do |column|
         changes[column] = time
       end
+      changes[self.class.locking_column] = increment_lock if locking_enabled?
+
       changes
     end
 
