@@ -517,7 +517,6 @@ module ActiveRecord
         changes = {}
 
         attributes.each do |column|
-          column = column.to_s
           changes[column] = write_attribute(column, time)
         end
 
