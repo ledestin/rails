@@ -514,10 +514,14 @@ module ActiveRecord
       attributes.concat(names)
 
       unless attributes.empty?
+        attributes.each do |column|
+          write_attribute(column, time)
+        end
+
         changes = {}
 
         attributes.each do |column|
-          changes[column] = write_attribute(column, time)
+          changes[column] = time
         end
 
         primary_key = self.class.primary_key
