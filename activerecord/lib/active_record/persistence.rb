@@ -547,7 +547,7 @@ module ActiveRecord
       changes
     end
 
-    def touch_scope
+    def prepare_touch_scope
       primary_key = self.class.primary_key
       scope = self.class.unscoped.where(primary_key => _read_attribute(primary_key))
 
