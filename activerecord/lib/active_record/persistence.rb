@@ -519,14 +519,7 @@ module ActiveRecord
         end
 
         changes = prepare_changes_hash(attributes, time)
-
-        primary_key = self.class.primary_key
-        scope = self.class.unscoped.where(primary_key => _read_attribute(primary_key))
-
-        if locking_enabled?
-          locking_column = self.class.locking_column
-          scope = scope.where(locking_column => _read_attribute(locking_column))
-        end
+        scope = prepare_scope
 
         clear_attribute_changes(changes.keys)
         result = scope.update_all(changes) == 1
@@ -552,6 +545,18 @@ module ActiveRecord
       changes[self.class.locking_column] = increment_lock if locking_enabled?
 
       changes
+    end
+
+    def prepare_scope
+      primary_key = self.class.primary_key
+      scope = self.class.unscoped.where(primary_key => _read_attribute(primary_key))
+
+      if locking_enabled?
+        locking_column = self.class.locking_column
+        scope = scope.where(locking_column => _read_attribute(locking_column))
+      end
+
+      scope
     end
 
     # A hook to be overridden by association modules.
