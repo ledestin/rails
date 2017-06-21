@@ -512,10 +512,14 @@ module ActiveRecord
       time ||= current_time_from_proper_timezone
       attributes = timestamp_attributes_for_update_in_model
       attributes.concat(names)
+      attributes.map!(&:to_s)
 
       return true if attributes.empty?
 
-      changes = changes_of_time_for_attributes(attributes, time)
+      write_attributes(attributes, time)
+
+      changes = {}
+      add_changes_of_time_for_attributes(changes, attributes, time)
 
       scope = scope_by_primary_key
 
@@ -537,11 +541,16 @@ module ActiveRecord
 
   private
 
-    def changes_of_time_for_attributes(attributes, time)
+    def  write_attributes(attributes, time)
+      attributes.each do |column|
+        write_attribute(column, time)
+      end
+    end
+
+    def add_changes_of_time_for_attributes(changes, attributes, time)
       changes = {}
       attributes.each do |column|
-        column = column.to_s
-        changes[column] = write_attribute(column, time)
+        changes[column] = time
       end
       changes
     end
