@@ -514,12 +514,7 @@ module ActiveRecord
       attributes.concat(names)
 
       unless attributes.empty?
-        changes = {}
-
-        attributes.each do |column|
-          column = column.to_s
-          changes[column] = write_attribute(column, time)
-        end
+        changes = changes_of_time_for_attributes(attributes, time)
 
         primary_key = self.class.primary_key
         scope = self.class.unscoped.where(primary_key => _read_attribute(primary_key))
@@ -545,6 +540,15 @@ module ActiveRecord
     end
 
   private
+
+    def changes_of_time_for_attributes(attributes, time)
+      changes = {}
+      attributes.each do |column|
+        column = column.to_s
+        changes[column] = write_attribute(column, time)
+      end
+      changes
+    end
 
     # A hook to be overridden by association modules.
     def destroy_associations
