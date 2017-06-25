@@ -518,8 +518,8 @@ module ActiveRecord
           write_attribute(column, time)
         end
 
-        changes = prepare_changes_hash(attributes, time)
         scope = prepare_touch_scope
+        changes = prepare_changes_hash(attributes, time)
 
         clear_attribute_changes(changes.keys)
         result = scope.update_all(changes) == 1
