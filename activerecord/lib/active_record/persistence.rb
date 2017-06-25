@@ -514,6 +514,8 @@ module ActiveRecord
       attributes.concat(names)
 
       unless attributes.empty?
+        scope = prepare_touch_scope_based_on_current_attribute_values
+
         changes = {}
 
         attributes.each do |column|
@@ -521,13 +523,8 @@ module ActiveRecord
           changes[column] = write_attribute(column, time)
         end
 
-        primary_key = self.class.primary_key
-        scope = self.class.unscoped.where(primary_key => _read_attribute(primary_key))
-
         if locking_enabled?
-          locking_column = self.class.locking_column
-          scope = scope.where(locking_column => read_attribute_before_type_cast(locking_column))
-          changes[locking_column] = increment_lock
+          changes[self.class.locking_column] = increment_lock
         end
 
         clear_attribute_changes(changes.keys)
@@ -545,6 +542,17 @@ module ActiveRecord
     end
 
   private
+
+    def prepare_touch_scope_based_on_current_attribute_values
+      primary_key = self.class.primary_key
+      scope = self.class.unscoped.where(primary_key => _read_attribute(primary_key))
+      if locking_enabled?
+        locking_column = self.class.locking_column
+        scope = scope.where(locking_column => read_attribute_before_type_cast(locking_column))
+      end
+
+      scope
+    end
 
     # A hook to be overridden by association modules.
     def destroy_associations
