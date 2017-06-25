@@ -516,10 +516,7 @@ module ActiveRecord
       unless attributes.empty?
         changes = {}
 
-        attributes.each do |column|
-          column = column.to_s
-          changes[column] = write_attribute(column, time)
-        end
+        update_record_and_changes_with_time(attributes, time, changes)
 
         primary_key = self.class.primary_key
         scope = self.class.unscoped.where(primary_key => _read_attribute(primary_key))
@@ -545,6 +542,13 @@ module ActiveRecord
     end
 
   private
+
+    def update_record_and_changes_with_time(attributes, time, changes)
+      attributes.each do |column|
+        column = column.to_s
+        changes[column] = write_attribute(column, time)
+      end
+    end
 
     # A hook to be overridden by association modules.
     def destroy_associations
