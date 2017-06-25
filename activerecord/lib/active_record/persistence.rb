@@ -517,9 +517,7 @@ module ActiveRecord
         changes = {}
 
         update_record_and_changes_with_time(attributes, time, changes)
-
-        primary_key = self.class.primary_key
-        scope = self.class.unscoped.where(primary_key => _read_attribute(primary_key))
+        scope = scope_by_primary_key
 
         if locking_enabled?
           locking_column = self.class.locking_column
@@ -548,6 +546,11 @@ module ActiveRecord
         column = column.to_s
         changes[column] = write_attribute(column, time)
       end
+    end
+
+    def scope_by_primary_key
+      primary_key = self.class.primary_key
+      self.class.unscoped.where(primary_key => _read_attribute(primary_key))
     end
 
     # A hook to be overridden by association modules.
