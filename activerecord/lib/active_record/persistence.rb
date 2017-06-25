@@ -517,17 +517,8 @@ module ActiveRecord
         scope = prepare_touch_scope_based_on_current_attribute_values
 
         changes = {}
+        prepare_record_and_changes_hash(attributes, time, changes)
 
-        attributes.each do |column|
-          column = column.to_s
-          changes[column] = write_attribute(column, time)
-        end
-
-        if locking_enabled?
-          changes[self.class.locking_column] = increment_lock
-        end
-
-        clear_attribute_changes(changes.keys)
         result = scope.update_all(changes) == 1
 
         if !result && locking_enabled?
@@ -552,6 +543,19 @@ module ActiveRecord
       end
 
       scope
+    end
+
+    def prepare_record_and_changes_hash(attributes, time, changes)
+      attributes.each do |column|
+        column = column.to_s
+        changes[column] = write_attribute(column, time)
+      end
+
+      if locking_enabled?
+        changes[self.class.locking_column] = increment_lock
+      end
+
+      clear_attribute_changes(changes.keys)
     end
 
     # A hook to be overridden by association modules.
