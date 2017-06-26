@@ -517,7 +517,7 @@ module ActiveRecord
         scope = prepare_scope_to_match_this_record
 
         changes = {}
-        update_record_and_changes_hash(attributes, time, changes)
+        update_record_and_changes_with_same_data(attributes, time, changes)
 
         result = scope.update_all(changes) == 1
 
@@ -545,7 +545,7 @@ module ActiveRecord
       scope
     end
 
-    def update_record_and_changes_hash(attributes, time, changes)
+    def update_record_and_changes_with_same_data(attributes, time, changes)
       attributes.each do |column|
         column = column.to_s
         changes[column] = write_attribute(column, time)
