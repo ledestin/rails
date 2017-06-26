@@ -514,7 +514,7 @@ module ActiveRecord
       attributes.concat(names)
 
       unless attributes.empty?
-        scope = prepare_touch_scope_based_on_current_attribute_values
+        scope = prepare_scope_to_match_this_record
 
         changes = {}
         prepare_record_and_changes_hash(attributes, time, changes)
@@ -534,7 +534,7 @@ module ActiveRecord
 
   private
 
-    def prepare_touch_scope_based_on_current_attribute_values
+    def prepare_scope_to_match_this_record
       primary_key = self.class.primary_key
       scope = self.class.unscoped.where(primary_key => _read_attribute(primary_key))
       if locking_enabled?
