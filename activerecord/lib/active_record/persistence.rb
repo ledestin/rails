@@ -521,7 +521,7 @@ module ActiveRecord
 
         if locking_enabled?
           scope = extend_scope_to_match_locking_column_value(scope)
-          changes[self.class.locking_column] = increment_lock
+          update_record_and_changes_with_lock_increment(changes)
         end
 
         clear_attribute_changes(changes.keys)
@@ -545,6 +545,10 @@ module ActiveRecord
         column = column.to_s
         changes[column] = write_attribute(column, time)
       end
+    end
+
+    def update_record_and_changes_with_lock_increment(changes)
+      changes[self.class.locking_column] = increment_lock
     end
 
     def scope_by_primary_key
