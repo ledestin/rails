@@ -514,37 +514,45 @@ module ActiveRecord
       attributes.concat(names)
 
       unless attributes.empty?
-        changes = {}
-
         attributes.each do |column|
           column = column.to_s
-          changes[column] = write_attribute(column, time)
+          write_attribute(column, time)
         end
 
-        primary_key = self.class.primary_key
-        scope = self.class.unscoped.where(primary_key => _read_attribute(primary_key))
-
-        if locking_enabled?
-          locking_column = self.class.locking_column
-          scope = scope.where(locking_column => read_attribute_before_type_cast(locking_column))
-          changes[locking_column] = increment_lock
-        end
-
-        clear_attribute_changes(changes.keys)
-        result = scope.update_all(changes) == 1
-
-        if !result && locking_enabled?
-          raise ActiveRecord::StaleObjectError.new(self, "touch")
-        end
-
-        @_trigger_update_callback = result
-        result
+        touch_columns(*attributes)
       else
         true
       end
     end
 
   private
+
+    def touch_columns(*names)
+      changes = {}
+
+      names.each do |column|
+        changes[column] = read_attribute(column)
+      end
+
+      primary_key = self.class.primary_key
+      scope = self.class.unscoped.where(primary_key => _read_attribute(primary_key))
+
+      if locking_enabled?
+        locking_column = self.class.locking_column
+        scope = scope.where(locking_column => read_attribute_before_type_cast(locking_column))
+        changes[locking_column] = increment_lock
+      end
+
+      clear_attribute_changes(changes.keys)
+      result = scope.update_all(changes) == 1
+
+      if !result && locking_enabled?
+        raise ActiveRecord::StaleObjectError.new(self, "touch")
+      end
+
+      @_trigger_update_callback = result
+      result
+    end
 
     # A hook to be overridden by association modules.
     def destroy_associations
